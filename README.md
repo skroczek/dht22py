@@ -61,12 +61,68 @@ application.
 
 ## Configuration
 
-- Modify the script arguments in the systemd service file to match your setup:
-  ```ini
-  # /etc/systemd/system/dht22py.service
-  [Service]
-  ExecStart=/path/to/venv/bin/python /path/to/your_script.py --output json
-  ```
+### Creating the User for the systemd Service
+
+To securely run the systemd service, it is recommended to create a specific user with minimal rights. This step reduces the risk that vulnerabilities in the application could compromise the system. Execute the following command to create the user `dht22`:
+
+```bash
+sudo adduser --system --no-create-home --group dht22
+```
+
+This command creates a system user without a home directory (`--no-create-home`) and a corresponding group (`--group`). The user `dht22` will be used to run the systemd service.
+
+### Setting Permissions
+
+The user `dht22` needs specific permissions to access the necessary resources, including the directory where the script and the virtual environment are stored. Set the appropriate permissions with the following commands:
+
+```bash
+sudo chown -R dht22:dht22 /opt/dht22py
+sudo chmod -R 750 /opt/dht22py
+```
+
+These commands change the owner of the `/opt/dht22py` directory to the user `dht22` and set the access rights so that the owner has full access rights, the group has restricted rights, and other users have no access.
+
+### Access to GPIO Pins
+
+If the script requires access to GPIO pins, the user `dht22` may need to be added to the `gpio` group to obtain the necessary permissions:
+
+```bash
+sudo usermod -a -G gpio dht22
+```
+
+This command adds the user `dht22` to the `gpio` group, granting the required permissions to access the GPIO pins.
+
+### Systemd Service Configuration
+
+Ensure that the systemd unit file is correctly configured to use the user `dht22`:
+
+```ini
+[Unit]
+Description=My Python Application to monitor temperature and humidity
+After=network.target
+
+[Service]
+Type=simple
+User=dht22
+Group=dht22
+WorkingDirectory=/opt/dht22py
+ExecStart=/opt/dht22py/venv/bin/python /opt/dht22py/dht22py.py --output json --file /var/lib/dht22py/data.json
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+This ensures that the service runs under the user `dht22` and uses the correct environmental settings.
+
+### Checking Service Status
+
+After starting the service, its status can be checked with the following command:
+
+```bash
+sudo systemctl status dht22py.service
+```
 
 ## Usage
 
