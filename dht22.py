@@ -6,11 +6,14 @@ import signal
 import board
 import adafruit_dht
 import logging
+from systemd.journal import JournalHandler
 
-# Setup basic logging
-logging.basicConfig(level=logging.INFO, filename='/var/log/myapp/myapp.log', filemode='a',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# Setup logging to use systemd's journal
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+journal_handler = JournalHandler()
+journal_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+logger.addHandler(journal_handler)
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Read temperature and humidity data')

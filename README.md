@@ -22,6 +22,25 @@ Before deploying this script, ensure you have the following:
 - Access to GPIO pins for the DHT22 sensor.
 - Required Python libraries: `adafruit_dht`, `board`.
 
+## System Requirements
+
+Before installing and running dht22, ensure the following dependencies are installed on your system:
+
+* **libsystemd-dev:** Required for logging integration with systemd's journal. This package provides the necessary
+  development libraries for systemd-python.
+
+### Installing System Dependencies
+
+On Debian-based systems, you can install all required system dependencies with the following command:
+
+```bash
+sudo apt-get update
+sudo apt-get install libsystemd-dev
+```
+
+Ensure these packages are installed before proceeding with the installation of the Python dependencies or running the
+application.
+
 ## Installation
 
 1. **Clone the Repository:**
