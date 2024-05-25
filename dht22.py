@@ -17,7 +17,7 @@ logger.addHandler(journal_handler)
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Read temperature and humidity data')
-parser.add_argument('--port', type=int, default=4, help='GPIO port number (default: 4)')
+parser.add_argument('--port', type=int, required=True, help='GPIO port number')
 parser.add_argument('--output', type=str, choices=['text', 'json'], default='json',
                     help='Output format: "text" or "json" (default: json)')
 parser.add_argument('--retry', type=int, default=5, help='Maximum number of retry attempts (default: 5)')
@@ -26,9 +26,13 @@ parser.add_argument('--file', type=str, help='File path to write output')
 
 args = parser.parse_args()
 
-# Initialize the sensor
-if args.port == 4:  # Example for GPIO 4, expand as needed
-    sensor = adafruit_dht.DHT22(board.D4)
+# Initialize the sensor based on GPIO port
+try:
+    gpio_pin = getattr(board, f'D{args.port}')
+    sensor = adafruit_dht.DHT22(gpio_pin)
+except AttributeError:
+    logger.critical(f"Unsupported port: {args.port}")
+    sys.exit(1)
 
 
 # Function to fetch sensor data

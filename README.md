@@ -98,7 +98,7 @@ Ensure that the systemd unit file is correctly configured to use the user `dht22
 
 ```ini
 [Unit]
-Description=My Python Application to monitor temperature and humidity
+Description=Temperature and Humidity Monitoring Service for GPIO %I
 After=network.target
 
 [Service]
@@ -106,7 +106,8 @@ Type=simple
 User=dht22
 Group=dht22
 WorkingDirectory=/opt/dht22py
-ExecStart=/opt/dht22py/venv/bin/python /opt/dht22py/dht22py.py --output json --file /var/lib/dht22py/data.json
+Environment="PATH=/opt/dht22py/venv/bin:/usr/bin:/bin"
+ExecStart=/opt/dht22py/venv/bin/python /opt/dht22py/dht22.py --port %I --output json --watch --file /var/lib/dht22py/data_%I.json
 Restart=on-failure
 RestartSec=10s
 
@@ -121,7 +122,7 @@ This ensures that the service runs under the user `dht22` and uses the correct e
 After starting the service, its status can be checked with the following command:
 
 ```bash
-sudo systemctl status dht22py.service
+sudo systemctl status dht22py@4
 ```
 
 ## Usage
@@ -129,13 +130,13 @@ sudo systemctl status dht22py.service
 To start the service manually:
 
 ```bash
-sudo systemctl start dht22py.service
+sudo systemctl start dht22py@4
 ```
 
 To enable automatic startup at boot time:
 
 ```bash
-sudo systemctl enable dht22py.service
+sudo systemctl enable dht22py@4
 ```
 
 ## Companion Go Program
